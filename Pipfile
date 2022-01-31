@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+djangorestframework = "~=3.2"
+django = "~=4.0"
+django-filter = "~=1.0.1"
+psycopg2 = "~=2.9.3"
+django-cors-headers = "~=3.11"
+django-debug-toolbar = "~=3.2.4"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
