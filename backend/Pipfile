@@ -6,10 +6,12 @@ name = "pypi"
 [packages]
 djangorestframework = "~=3.2"
 django = "~=4.0"
-django-filter = "~=1.0.1"
+django-filter = "~=21.1"
 psycopg2 = "~=2.9.3"
 django-cors-headers = "~=3.11"
 django-debug-toolbar = "~=3.2.4"
+requests = "~=2.27.1"
+coinbase = "~=2.1.0"
 
 [dev-packages]
 
