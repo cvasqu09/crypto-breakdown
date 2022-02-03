@@ -32,3 +32,20 @@ class Account(models.Model):
     balance_currency = models.CharField(max_length=10)
     native_amount = models.DecimalField(**decimal_fields)
     native_currency = models.CharField(max_length=10)
+
+
+class Buy(models.Model):
+    class BuyStatus(models.TextChoices):
+        CANCELLED = 'canceled'
+        CREATED = 'created'
+        COMPLETED = 'completed'
+
+    id = models.UUIDField(primary_key=True)
+    account = models.ForeignKey('Account', on_delete=models.CASCADE)
+    status = models.CharField(choices=BuyStatus.choices, max_length=10)
+    created_at = models.DateTimeField(null=True)
+    fees = models.JSONField()
+    amount = models.JSONField()
+
+    def validate_fees():
+

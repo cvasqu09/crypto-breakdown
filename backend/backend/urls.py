@@ -18,10 +18,11 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from backend import settings
-from crypto.viewsets import AccountViewSet
+from crypto.viewsets import AccountViewSet, RefreshViewSet
 
 router = DefaultRouter()
 router.register(r'accounts', AccountViewSet, basename="accounts")
+router.register(r'refresh', RefreshViewSet, basename="refresh")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

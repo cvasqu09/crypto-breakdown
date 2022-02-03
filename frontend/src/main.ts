@@ -11,12 +11,18 @@ import "primeicons/primeicons.css"; //icons
 import "primeflex/primeflex.css";
 import HomePage from "./components/HomePage.vue";
 import AccountPage from "./components/AccountPage.vue";
+import AccountDetailPage from "./components/AccountDetailPage.vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 
 const routes = [
   { path: "/", redirect: "/home" },
   { path: "/home", component: HomePage, name: "home" },
   { path: "/account", component: AccountPage, name: "account" },
+  {
+    path: "/account/:id",
+    component: AccountDetailPage,
+    name: "account-detail",
+  },
 ];
 
 const router = createRouter({
