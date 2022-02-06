@@ -1,6 +1,19 @@
 from rest_framework import serializers
-
 from crypto.models import Account, Buy
+from crypto.validations import JsonSchemaValidator
+
+amount_schema = {
+    "type": "object",
+    "properties": {
+        "amount": {
+            "type": "number",
+        },
+        "currency": {
+            "type": "string",
+        },
+    },
+    "required": ["amount", "currency"]
+}
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -13,5 +26,20 @@ class BuySerializer(serializers.ModelSerializer):
     class Meta:
         model = Buy
         fields = '__all__'
-        read_only_fields = ['id']
 
+    def validate_fees(self, data):
+        for fee in data:
+            JsonSchemaValidator.validate(fee, amount_schema)
+        return data
+
+    def validate_amount(self, data):
+        JsonSchemaValidator.validate(data, amount_schema)
+        return data
+
+    def validate_subtotal(self, data):
+        JsonSchemaValidator.validate(data, amount_schema)
+        return data
+
+    def validate_total(self, data):
+        JsonSchemaValidator.validate(data, amount_schema)
+        return data

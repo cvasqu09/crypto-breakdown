@@ -25,13 +25,27 @@ class CryptoTransaction(models.Model):
     native_amount_currency = models.CharField(max_length=10)
 
 
+class AccountModelManager(models.Manager):
+    def create_account(self, account):
+        Account.objects.create(
+            id=account["id"],
+            name=account["name"],
+            balance_amount=account["balance"]["amount"],
+            balance_currency=account["balance"]["currency"],
+            native_amount=account["native_balance"]["amount"],
+            native_currency=account["native_balance"]["currency"]
+        )
+
+
 class Account(models.Model):
-    id=models.UUIDField(primary_key=True)
+    id = models.UUIDField(primary_key=True)
     name = models.CharField(max_length=128)
     balance_amount = models.DecimalField(**decimal_fields)
     balance_currency = models.CharField(max_length=10)
     native_amount = models.DecimalField(**decimal_fields)
     native_currency = models.CharField(max_length=10)
+
+    objects = AccountModelManager()
 
 
 class Buy(models.Model):
@@ -44,8 +58,8 @@ class Buy(models.Model):
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     status = models.CharField(choices=BuyStatus.choices, max_length=10)
     created_at = models.DateTimeField(null=True)
-    fees = models.JSONField()
-    amount = models.JSONField()
-
-    def validate_fees():
+    fees = models.JSONField(default=list)
+    amount = models.JSONField(default=dict)
+    subtotal = models.JSONField(default=dict)
+    total = models.JSONField(default=dict)
 

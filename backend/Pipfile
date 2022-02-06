@@ -12,6 +12,7 @@ django-cors-headers = "~=3.11"
 django-debug-toolbar = "~=3.2.4"
 requests = "~=2.27.1"
 coinbase = "~=2.1.0"
+jsonschema = "~=4.4.0"
 
 [dev-packages]
 

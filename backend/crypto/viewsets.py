@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
@@ -13,7 +13,6 @@ class RefreshViewSet(ViewSet):
 
     @action(detail=False, methods=['post'])
     def accounts(self, request):
-        account_data = coinbase_client.get_accounts()
         print('account data', account_data)
         account_ids = [account["id"] for account in account_data["data"]]
         accounts = Account.objects.filter(id__in=account_ids)
@@ -27,14 +26,7 @@ class RefreshViewSet(ViewSet):
                 account_to_update.native_currency = account["native_balance"]["currency"]
                 account_to_update.save()
             else:
-                Account.objects.create(
-                    id=account["id"],
-                    name=account["name"],
-                    balance_amount=account["balance"]["amount"],
-                    balance_currency=account["balance"]["currency"],
-                    native_amount=account["native_balance"]["amount"],
-                    native_currency=account["native_balance"]["currency"]
-                )
+                Account.objects.create_account(account)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -45,23 +37,25 @@ class RefreshViewSet(ViewSet):
         buy_data = coinbase_client.get_buys(account_id)
         buys = Buy.objects.filter(account__id=account_id)
         existing_buy_ids = [str(b.id) for b in buys]
+        existing_account_ids = Account.objects.all().values_list('id', flat=True)
+        existing_account_ids = [str(account_id) for account_id in existing_account_ids]
         for buy in buy_data["data"]:
-            # if buy["id"] not in existing_buy_ids:
-            #     fields = Buy._meta.fields
-            #     data_to_serialize = {}
-            #     for field in fields:
-            #         buy_field = buy.get(field, None)
-            #         if not isinstance()
-            #     new_buy = BuySerializer({
-            #         "id": buy["id"],
-            #         "account": account_id,
-            #         "status": buy["status"],
-            #         "created_at": buy["created_at"]
-            #     })
-            print('buy', buy)
-            print(type(buy["fees"]))
+            if buy["id"] not in existing_buy_ids:
+                data_to_serialize = {
+                    **buy,
+                    "account": account_id
+                }
+                new_buy = BuySerializer(data=data_to_serialize)
+                try:
+                    if account_id not in existing_account_ids:
+                        account = coinbase_client.get_account(account_id)
+                        Account.objects.create_account(account)
+                    new_buy.is_valid(raise_exception=True)
+                    new_buy.save()
+                except serializers.ValidationError as e:
+                    print('e', e)
 
-        return Response(data=buys)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AccountViewSet(ModelViewSet):
