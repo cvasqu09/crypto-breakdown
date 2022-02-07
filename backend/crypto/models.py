@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 decimal_fields = {"decimal_places": 8, "max_digits": 30}
@@ -44,6 +45,7 @@ class Account(models.Model):
     balance_currency = models.CharField(max_length=10)
     native_amount = models.DecimalField(**decimal_fields)
     native_currency = models.CharField(max_length=10)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
 
     objects = AccountModelManager()
 
@@ -63,3 +65,7 @@ class Buy(models.Model):
     subtotal = models.JSONField(default=dict)
     total = models.JSONField(default=dict)
 
+
+class FavoriteWallet(models.Model):
+    wallet = models.ForeignKey('Account', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
