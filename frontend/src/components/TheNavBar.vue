@@ -9,7 +9,7 @@ export default {
   setup() {
     const tabs = [
       {label: 'Home', icon: 'pi pi-home', to: '/'},
-      {label: 'Wallets', icon: 'pi pi-wallet', to: '/account'},
+      {label: 'Wallets', icon: 'pi pi-wallet', to: '/wallet'},
     ]
     return {
       tabs

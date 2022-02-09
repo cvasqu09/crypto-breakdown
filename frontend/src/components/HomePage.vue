@@ -8,7 +8,7 @@
   </div>
   <h3>Favorite Wallets</h3>
   <div v-for="favorite in favoriteWallets">
-    {{favorite.wallet.name}}
+    <Button @click="navigateToWalletDetail(favorite.wallet.id)">{{favorite.wallet.name}}</Button>
   </div>
 </template>
 
@@ -30,7 +30,7 @@ export default {
     const menuItems = [{
       label: 'Account',
       command: () => {
-        router.push('/account')
+        router.push('/wallet')
       }
     }]
     const menu = ref(null);
@@ -39,6 +39,9 @@ export default {
       menu.value.toggle(event);
     }
 
+    const navigateToWalletDetail = (walletId) => {
+      router.push({ name: 'wallet-detail', params: {id: walletId}})
+    }
 
     onMounted(async () => {
       favoriteWallets.value = await walletStore.loadFavoriteWallets();
@@ -51,6 +54,7 @@ export default {
       favoriteWallets,
       menuItems,
       menu,
+      navigateToWalletDetail,
       toggle
     }
   }

@@ -28,7 +28,7 @@ class CryptoTransaction(models.Model):
 
 class AccountModelManager(models.Manager):
     def create_account(self, account):
-        Account.objects.create(
+        return Account.objects.get_or_create(
             id=account["id"],
             name=account["name"],
             balance_amount=account["balance"]["amount"],

@@ -11,15 +11,17 @@ import "primevue/resources/primevue.min.css"; //core css
 import "primeicons/primeicons.css"; //icons
 import "primeflex/primeflex.css";
 import HomePage from "./components/HomePage.vue";
-import AccountPage from "./components/AccountPage.vue";
+import WalletDetailPage from "./components/WalletDetailPage.vue";
 import AccountDetailPage from "./components/AccountDetailPage.vue";
 
 import { createRouter, createWebHashHistory } from "vue-router";
+import WalletPage from "./components/WalletPage.vue";
 
 const routes = [
   { path: "/", redirect: "/home" },
   { path: "/home", component: HomePage, name: "home" },
-  { path: "/account", component: AccountPage, name: "account" },
+  { path: "/wallet", component: WalletPage, name: "wallet" },
+  { path: "/wallet/:id", component: WalletDetailPage, name: "wallet-detail" },
   {
     path: "/account/:id",
     component: AccountDetailPage,

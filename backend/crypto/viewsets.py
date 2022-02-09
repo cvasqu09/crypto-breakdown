@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import status, serializers
@@ -15,11 +17,21 @@ class RefreshViewSet(ViewSet):
 
     @action(detail=False, methods=['post'])
     def accounts(self, request):
-        print('account data', account_data)
-        account_ids = [account["id"] for account in account_data["data"]]
-        accounts = Account.objects.filter(id__in=account_ids)
-        accounts_dict = {str(account.id): account for account in accounts}
+        account_data = coinbase_client.get_accounts(limit=100)
+        # print('account data', account_data)
+        valid_accounts = []
+        valid_account_ids = []
         for account in account_data["data"]:
+            try:
+                uuid_obj = UUID(account["id"])
+                valid_accounts.append(account)
+                valid_account_ids.append(str(uuid_obj))
+            except ValueError:
+                continue
+
+        accounts = Account.objects.filter(id__in=valid_account_ids)
+        accounts_dict = {str(account.id): account for account in accounts}
+        for account in valid_accounts:
             if account["id"] in accounts_dict:
                 account_to_update: Account = accounts_dict[account["id"]]
                 account_to_update.balance_amount = account["balance"]["amount"]
@@ -28,6 +40,7 @@ class RefreshViewSet(ViewSet):
                 account_to_update.native_currency = account["native_balance"]["currency"]
                 account_to_update.save()
             else:
+
                 Account.objects.create_account(account)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -86,10 +99,26 @@ class AccountViewSet(ModelViewSet):
 
             return Response(status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=['get'])
+    def buys(self, request, pk=None):
+        buys = list(Buy.objects.filter(account__id=pk))
 
-class BuyViewSet(ModelViewSet):
-    serializer_class = BuySerializer
+        account = Account.objects.get(id=pk)
+        buys_serializer = BuySerializer(buys, many=True)
 
-    @action(detail=False, methods=['post'])
-    def refresh(self):
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        buys_data = {
+            "data": buys_serializer.data,
+            "symbol":  account.balance_currency
+        }
+
+        return Response(status=status.HTTP_200_OK, data=buys_data)
+
+
+class CurrencyViewSet(ViewSet):
+    def list(self, request):
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'])
+    def exchange_rates(self, request):
+        rates_data = coinbase_client.get_exchange_rates(currency='USD')
+        return Response(status=status.HTTP_200_OK, data=rates_data)
