@@ -1,19 +1,20 @@
 <template>
   <div class="flex justify-content-end">
-<!--    <Button icon="pi pi-bars" type="button" @click="toggle"/>-->
+    <!--    <Button icon="pi pi-bars" type="button" @click="toggle"/>-->
     <Menu ref="menu" :model="menuItems" :popup="true"/>
   </div>
   <div v-for="account in accounts">
     {{ account.name }} {{ account.native_amount }}
   </div>
   <h3>Favorite Wallets</h3>
+  {{breakdown}}
   <div v-for="favorite in favoriteWallets">
-    <Button @click="navigateToWalletDetail(favorite.wallet.id)">{{favorite.wallet.name}}</Button>
+    <Button @click="navigateToWalletDetail(favorite.wallet.id)">{{ favorite.wallet.name }}</Button>
   </div>
 </template>
 
 <script>
-import {onMounted, ref, watch} from "@vue/runtime-core";
+import {onMounted, ref} from "@vue/runtime-core";
 import httpClient from "../httpClient";
 import {useRouter} from "vue-router";
 import {useWallet} from "../store/useWallet";
@@ -25,7 +26,7 @@ export default {
     const accounts = ref([]);
     const router = useRouter()
     const walletStore = useWallet()
-    const {favoriteWallets} = storeToRefs(walletStore);
+    const {favoriteWallets, breakdown} = storeToRefs(walletStore);
 
     const menuItems = [{
       label: 'Account',
@@ -40,17 +41,17 @@ export default {
     }
 
     const navigateToWalletDetail = (walletId) => {
-      router.push({ name: 'wallet-detail', params: {id: walletId}})
+      router.push({name: 'wallet-detail', params: {id: walletId}})
     }
 
     onMounted(async () => {
-      favoriteWallets.value = await walletStore.loadFavoriteWallets();
-      const response = await httpClient.get('/accounts')
-      accounts.value = response.data.filter(account => parseFloat(account["native_amount"]) !== 0)
+      await walletStore.loadFavoriteWallets();
+      await walletStore.loadBreakdown();
     })
 
     return {
       accounts,
+      breakdown,
       favoriteWallets,
       menuItems,
       menu,

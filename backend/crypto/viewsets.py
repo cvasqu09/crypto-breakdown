@@ -2,6 +2,7 @@ from uuid import UUID
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from rest_framework import status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -73,9 +74,25 @@ class RefreshViewSet(ViewSet):
 
 
 class AccountViewSet(ModelViewSet):
-    queryset = Account.objects.all()
+    queryset = Account.objects.all().order_by('balance_currency')
     serializer_class = AccountSerializer
     http_method_names = ['get', 'post']
+
+    @action(detail=False, methods=['get'])
+    def breakdown(self, request):
+        breakdown = {}
+
+        total_native_spent = self.queryset.aggregate(Sum('native_amount'))
+        breakdown['total_spent'] = total_native_spent['native_amount__sum']
+
+        all_buys = Buy.objects.all()
+        total_fees = 0
+        for buy in all_buys:
+            fees = buy.fees
+            total_fees += sum(float(fee["amount"]["amount"]) for fee in fees)
+        breakdown["total_fees"] = total_fees
+
+        return Response(status=status.HTTP_200_OK, data=breakdown)
 
     @action(detail=False, methods=['get', 'post'])
     def favorites(self, request):
@@ -90,12 +107,14 @@ class AccountViewSet(ModelViewSet):
             body = request.data
             ids = body["ids"]
             user_favorites = FavoriteWallet.objects.filter(user=me)
-            user_favorites = [str(favorite["id"]) for favorite in user_favorites]
-            user_wallets = list(Account.objects.filter(user=me))
+            user_favorites_ids = [str(favorite.wallet_id) for favorite in user_favorites]
             for favorite_id in ids:
-                if str(favorite_id) not in user_favorites:
-                    wallet_to_favorite = next(wallet for wallet in user_wallets if str(wallet.id) == favorite_id)
+                if str(favorite_id) not in user_favorites_ids:
+                    wallet_to_favorite = Account.objects.get(id=favorite_id)
                     FavoriteWallet.objects.create(user=me, wallet=wallet_to_favorite)
+                else:
+                    wallet_to_delete = next(wallet for wallet in user_favorites if str(wallet.wallet_id) == favorite_id)
+                    wallet_to_delete.delete()
 
             return Response(status=status.HTTP_201_CREATED)
 

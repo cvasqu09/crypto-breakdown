@@ -21,7 +21,7 @@ export default {
     const { favoriteWallets } = storeToRefs(useWallet())
 
     const goToAccountDetailPage = (id: string) => {
-      router.push({name: 'account-detail', params: {id}})
+      router.push({name: 'wallet-detail', params: {id}})
     }
 
     onMounted(async () => {
