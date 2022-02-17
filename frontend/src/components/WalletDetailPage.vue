@@ -6,25 +6,30 @@
   <div>{{ totalAmountBought }}</div>
   <h4>Total cost</h4>
   <div>{{ totalCost }}</div>
+  <PieChart :labels="labels" :data="[totalFees, totalSubCost]"></PieChart>
   <Button @click="favoriteWallet">{{ getFavoriteButtonText }}</Button>
 </template>
 
 <script>
-import {onMounted, ref} from "@vue/runtime-core";
-import {useRoute} from "vue-router";
-import {computed} from "@vue/reactivity";
+import { onMounted, ref } from "@vue/runtime-core";
+import { useRoute } from "vue-router";
+import { computed } from "@vue/reactivity";
 import get from 'lodash/get';
-import {useWallet} from "../store/useWallet";
+import { useWallet } from "../store/useWallet";
 import httpClient from "../httpClient";
+import PieChart from "./charts/PieChart.vue";
+
 
 export default {
   name: "WalletDetailPage.vue",
+  components: { PieChart },
   setup() {
     const route = useRoute();
     const buys = ref([])
     const symbol = ref("");
     const walletStore = useWallet();
     const walletId = route.params.id;
+    const labels = ['Fees', 'Cost']
 
     const favoriteWallet = async () => {
       await walletStore.toggleFavoriteWallet(walletId);
@@ -43,7 +48,7 @@ export default {
     onMounted(async () => {
       const walletId = route.params.id;
       await walletStore.refreshWallet(walletId);
-      const response = await httpClient.get(`/accounts/${walletId}/buys`)
+      const response = await httpClient.get(`/accounts/${ walletId }/buys`)
       // const response = {
       //   data: {
       //     "symbol": "DOT",
@@ -108,6 +113,11 @@ export default {
       return amountList.reduce((prev, curr) => prev + parseFloat(curr), 0)
     })
 
+    const totalSubCost = computed(() => {
+      const amountList = buys.value.map(buy => get(buy, 'subtotal.amount', 0))
+      return amountList.reduce((prev, curr) => prev + parseFloat(curr), 0)
+    })
+
     const totalAmountBought = computed(() => {
       const amountList = buys.value.map(buy => get(buy, 'amount.amount', 0));
       return amountList.reduce((prev, curr) => {
@@ -126,8 +136,18 @@ export default {
       })
       return totalFeeAmount
     })
-
-    return {buys, totalAmountBought, totalFees, totalCost, symbol, favoriteWallet, getFavoriteButtonText}
+    
+    return {
+      buys,
+      totalAmountBought,
+      totalFees,
+      totalSubCost,
+      totalCost,
+      labels,
+      symbol,
+      favoriteWallet,
+      getFavoriteButtonText,
+    }
   }
 }
 </script>
