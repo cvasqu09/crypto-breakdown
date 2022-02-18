@@ -13,6 +13,19 @@ from crypto.models import Account, Buy, FavoriteWallet
 from crypto.serializers import AccountSerializer, BuySerializer, FavoriteWalletSerializer
 
 
+class BreakdownViewSet(ViewSet):
+    http_method_names = ['get']
+
+    def list(self, request):
+        accounts = list(Account.objects.all())
+        breakdown = {}
+        for account in accounts:
+            current_account_breakdown = Account.objects.get_account_breakdown(str(account.id))
+            if current_account_breakdown:
+                breakdown[account.name] = current_account_breakdown
+        return Response(status=status.HTTP_200_OK, data=breakdown)
+
+
 class RefreshViewSet(ViewSet):
     http_method_names = ['post']
 

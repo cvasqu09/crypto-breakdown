@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.conf import settings
 from django.db import models
 
@@ -36,6 +38,17 @@ class AccountModelManager(models.Manager):
             native_amount=account["native_balance"]["amount"],
             native_currency=account["native_balance"]["currency"]
         )
+
+    def get_account_breakdown(self, id):
+        account = Account.objects.get(pk=id)
+        account_buys = list(Buy.objects.filter(account=account))
+        breakdown = defaultdict(float)
+        for buy in account_buys:
+            fees = sum(float(fee["amount"]["amount"]) for fee in buy.fees)
+            subtotal = float(buy.subtotal["amount"])
+            breakdown["fees"] += fees
+            breakdown["subtotal"] += subtotal
+        return breakdown if breakdown != {} else None
 
 
 class Account(models.Model):

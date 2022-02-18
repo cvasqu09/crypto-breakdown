@@ -5,6 +5,7 @@ import PrimeVue from "primevue/config";
 import Button from "primevue/button";
 import Menu from "primevue/menu";
 import Dialog from "primevue/dialog";
+import Card from "primevue/card";
 import TabMenu from "primevue/tabmenu";
 import "primevue/resources/themes/md-dark-deeppurple/theme.css"; //theme
 import "primevue/resources/primevue.min.css"; //core css
@@ -42,4 +43,5 @@ app.component("Button", Button);
 app.component("Dialog", Dialog);
 app.component("Menu", Menu);
 app.component("TabMenu", TabMenu);
+app.component("Card", Card);
 app.mount("#app");

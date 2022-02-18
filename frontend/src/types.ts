@@ -1,4 +1,4 @@
-export interface Account {
+export interface Wallet {
   id: string;
   name: string;
   balance_currency: string;

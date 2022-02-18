@@ -5,6 +5,7 @@
 <script>
 import {onMounted, ref} from "@vue/runtime-core";
 import {Chart, registerables} from "chart.js";
+import {toRefs, watch} from "vue";
 
 Chart.register(...registerables);
 
@@ -22,21 +23,20 @@ export default {
     }
   },
   setup(props) {
-    const chart = ref(null);
+    let myChart = null;
 
-    onMounted(() => {
-      console.log('props', props)
+    const buildChart = (labels, data) => {
       const ctx = document.getElementById('chart');
 
-      const myChart = new Chart(ctx, {
+      myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: [
-            ...props.labels
+            ...labels
           ],
           datasets: [{
             label: 'My First Dataset',
-            data: [...props.data],
+            data: [...data],
             backgroundColor: [
               'rgb(255, 99, 132)',
               'rgb(54, 162, 235)',
@@ -45,11 +45,12 @@ export default {
           }]
         }
       });
-    })
-
-    return {
-      chart
     }
+
+    watch(props, () => {
+      console.log(props.data)
+      buildChart(props.labels, props.data)
+    })
   }
 }
 

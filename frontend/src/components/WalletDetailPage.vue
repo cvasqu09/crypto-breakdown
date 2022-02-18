@@ -6,7 +6,7 @@
   <div>{{ totalAmountBought }}</div>
   <h4>Total cost</h4>
   <div>{{ totalCost }}</div>
-  <PieChart :labels="labels" :data="[totalFees, totalSubCost]"></PieChart>
+  <PieChart :labels="labels" :data="data"></PieChart>
   <Button @click="favoriteWallet">{{ getFavoriteButtonText }}</Button>
 </template>
 
@@ -43,7 +43,6 @@ export default {
         return 'Favorite'
       }
     })
-
 
     onMounted(async () => {
       const walletId = route.params.id;
@@ -115,7 +114,9 @@ export default {
 
     const totalSubCost = computed(() => {
       const amountList = buys.value.map(buy => get(buy, 'subtotal.amount', 0))
-      return amountList.reduce((prev, curr) => prev + parseFloat(curr), 0)
+      const ret =  amountList.reduce((prev, curr) => prev + parseFloat(curr), 0)
+      console.log('sub', ret);
+      return ret
     })
 
     const totalAmountBought = computed(() => {
@@ -123,6 +124,10 @@ export default {
       return amountList.reduce((prev, curr) => {
         return prev + parseFloat(curr)
       }, 0)
+    })
+
+    const data = computed(() => {
+      return [totalFees.value, totalSubCost.value]
     })
 
     const totalFees = computed(() => {
@@ -136,9 +141,10 @@ export default {
       })
       return totalFeeAmount
     })
-    
+
     return {
       buys,
+      data,
       totalAmountBought,
       totalFees,
       totalSubCost,

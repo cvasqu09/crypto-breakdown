@@ -9,14 +9,14 @@
 import { onMounted, ref, Ref } from "@vue/runtime-core";
 import httpClient from "../httpClient";
 import { useRouter } from 'vue-router';
-import { Account } from '../types';
+import { Wallet } from '../types';
 import { storeToRefs } from 'pinia';
 import { useWallet } from '../store/useWallet';
 
 export default {
   name: "WalletPage",
   setup() {
-    const accounts: Ref<Account[]> = ref([]);
+    const accounts: Ref<Wallet[]> = ref([]);
     const router = useRouter();
     const { favoriteWallets } = storeToRefs(useWallet())
 
