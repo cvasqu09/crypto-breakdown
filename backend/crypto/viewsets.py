@@ -13,6 +13,20 @@ from crypto.models import Account, Buy, FavoriteWallet
 from crypto.serializers import AccountSerializer, BuySerializer, FavoriteWalletSerializer
 
 
+class PriceViewSet(ViewSet):
+    http_method_names = ['get']
+
+    def list(self, request):
+        crypto_currency = request.query_params.get('crypto', None)
+        native_currency = request.query_params.get('native', 'USD')
+
+        try:
+            buy_price = coinbase_client.get_sell_price(currency_pair=f"{crypto_currency}-{native_currency}")
+            return Response(status=status.HTTP_200_OK, data=buy_price)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": 'Error retrieving buy price'})
+
+
 class BreakdownViewSet(ViewSet):
     http_method_names = ['get']
 

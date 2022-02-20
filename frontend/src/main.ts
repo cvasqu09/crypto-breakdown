@@ -1,5 +1,7 @@
 import { createApp } from "vue";
 import App from "./App.vue";
+import ToastService from "primevue/toastservice";
+
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 import Button from "primevue/button";
@@ -36,6 +38,7 @@ const router = createRouter({
 });
 
 const app = createApp(App);
+app.use(ToastService);
 app.use(router);
 app.use(createPinia());
 app.use(PrimeVue);

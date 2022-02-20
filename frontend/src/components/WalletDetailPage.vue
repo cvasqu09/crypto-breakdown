@@ -1,30 +1,57 @@
 <template>
+  <div class="flex justify-content-end">
+    <Toast position="top-right"></Toast>
+    <Button class="mt-3 p-button-info" @click="refreshAccount">Refresh accounts</Button>
+  </div>
   <h3>Wallet Detail</h3>
-  <h4>Fees</h4>
-  <div>{{ totalFees }}</div>
-  <h4>Total {{ symbol }} bought</h4>
-  <div>{{ totalAmountBought }}</div>
-  <h4>Total cost</h4>
-  <div>{{ totalCost }}</div>
+  <div class="flex justify-content-center">
+    <Card class="mr-3 cost-card">
+      <template #title>
+        <h4>Fees</h4>
+      </template>
+      <template #content>
+        <div>{{ `$${totalFees.toFixed(2)}` }}</div>
+      </template>
+    </Card>
+    <Card class="mr-3 cost-card">
+      <template #title>
+        <h4>Total {{ symbol }} bought</h4>
+      </template>
+      <template #content>
+        <div>{{ `${totalAmountBought.toFixed(5)}` }}</div>
+      </template>
+    </Card>
+    <Card class="cost-card">
+      <template #title>
+        <h4>Total cost</h4>
+      </template>
+      <template #content>
+        <div>{{ `$${totalCost.toFixed(2)}` }}</div>
+      </template>
+    </Card>
+  </div>
   <PieChart :labels="labels" :data="data"></PieChart>
   <Button @click="favoriteWallet">{{ getFavoriteButtonText }}</Button>
 </template>
 
 <script>
-import { onMounted, ref } from "@vue/runtime-core";
-import { useRoute } from "vue-router";
-import { computed } from "@vue/reactivity";
+import {onMounted, ref} from "@vue/runtime-core";
+import {useRoute} from "vue-router";
+import {computed} from "@vue/reactivity";
 import get from 'lodash/get';
-import { useWallet } from "../store/useWallet";
+import {useWallet} from "../store/useWallet";
 import httpClient from "../httpClient";
 import PieChart from "./charts/PieChart.vue";
+import {useToast} from "primevue/usetoast";
+import Toast from "primevue/toast";
 
 
 export default {
   name: "WalletDetailPage.vue",
-  components: { PieChart },
+  components: {PieChart, Toast},
   setup() {
     const route = useRoute();
+    const toast = useToast();
     const buys = ref([])
     const symbol = ref("");
     const walletStore = useWallet();
@@ -47,62 +74,7 @@ export default {
     onMounted(async () => {
       const walletId = route.params.id;
       await walletStore.refreshWallet(walletId);
-      const response = await httpClient.get(`/accounts/${ walletId }/buys`)
-      // const response = {
-      //   data: {
-      //     "symbol": "DOT",
-      //     "data": [{
-      //       "id": "99297e16-c068-56f0-af56-29520ecccc6e",
-      //       "status": "completed",
-      //       "created_at": "2022-01-06T03:28:35Z",
-      //       "fees": [{"type": "coinbase", "amount": {"amount": "3.42", "currency": "USD"}}, {
-      //         "type": "bank",
-      //         "amount": {"amount": "0.25", "currency": "USD"}
-      //       }],
-      //       "amount": {"amount": "9.4162304115", "currency": "DOT"},
-      //       "subtotal": {"amount": "246.33", "currency": "USD"},
-      //       "total": {"amount": "250.00", "currency": "USD"},
-      //       "account": "05f5a4c4-75e6-5b34-bcfe-03195041120c"
-      //     },
-      //       {
-      //         "id":
-      //             "02efc06e-7425-5075-978c-d7478a5ebf8b",
-      //         "status":
-      //             "completed",
-      //         "created_at":
-      //             "2021-12-18T17:44:35Z",
-      //         "fees":
-      //             [{"type": "coinbase", "amount": {"amount": "10.47", "currency": "USD"}}, {
-      //               "type": "bank",
-      //               "amount": {"amount": "0.25", "currency": "USD"}
-      //             }],
-      //         "amount":
-      //             {
-      //               "amount":
-      //                   "28.4686353436", "currency":
-      //                   "DOT"
-      //             }
-      //         ,
-      //         "subtotal":
-      //             {
-      //               "amount":
-      //                   "719.28", "currency":
-      //                   "USD"
-      //             }
-      //         ,
-      //         "total":
-      //             {
-      //               "amount":
-      //                   "730.00", "currency":
-      //                   "USD"
-      //             }
-      //         ,
-      //         "account":
-      //             "05f5a4c4-75e6-5b34-bcfe-03195041120c"
-      //       }
-      //     ]
-      //   }
-      // }
+      const response = await httpClient.get(`/accounts/${walletId}/buys`)
       buys.value = response.data.data
       symbol.value = response.data.symbol
     })
@@ -114,9 +86,7 @@ export default {
 
     const totalSubCost = computed(() => {
       const amountList = buys.value.map(buy => get(buy, 'subtotal.amount', 0))
-      const ret =  amountList.reduce((prev, curr) => prev + parseFloat(curr), 0)
-      console.log('sub', ret);
-      return ret
+      return amountList.reduce((prev, curr) => prev + parseFloat(curr), 0);
     })
 
     const totalAmountBought = computed(() => {
@@ -142,6 +112,16 @@ export default {
       return totalFeeAmount
     })
 
+    const refreshAccount = async () => {
+      try {
+        const walletId = route.params.id;
+        await httpClient.post('/refresh/buys/', {}, {params: {account_id: walletId}});
+        toast.add({severity: 'success', summary: 'Success', detail: 'Account refreshed', life: 4000})
+      } catch (e) {
+        toast.add({severity: 'error', summary: 'Error', detail: 'Could not refresh account info', life: 4000})
+      }
+    }
+
     return {
       buys,
       data,
@@ -153,11 +133,13 @@ export default {
       symbol,
       favoriteWallet,
       getFavoriteButtonText,
+      refreshAccount
     }
   }
 }
 </script>
 
 <style scoped>
-
+.cost-card {
+}
 </style>

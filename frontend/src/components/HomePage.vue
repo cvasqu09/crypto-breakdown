@@ -1,6 +1,5 @@
 <template>
   <div class="flex justify-content-end">
-    <!--    <Button icon="pi pi-bars" type="button" @click="toggle"/>-->
     <Menu ref="menu" :model="menuItems" :popup="true"/>
   </div>
   <div v-for="account in accounts">
@@ -35,7 +34,6 @@ import { Wallet } from '../types'
 
 export default {
   name: "HomePage",
-  components: {},
   setup() {
     const accounts = ref([]);
     const router = useRouter()
@@ -52,10 +50,6 @@ export default {
       }
     }]
     const menu = ref(null);
-
-    const toggle = (event) => {
-      menu.value.toggle(event);
-    }
 
     const navigateToWalletDetail = (walletId) => {
       router.push({name: 'wallet-detail', params: {id: walletId}})
@@ -76,7 +70,6 @@ export default {
       menuItems,
       menu,
       navigateToWalletDetail,
-      toggle
     }
   }
 }
