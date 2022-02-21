@@ -46,7 +46,6 @@ class RefreshViewSet(ViewSet):
     @action(detail=False, methods=['post'])
     def accounts(self, request):
         account_data = coinbase_client.get_accounts(limit=100)
-        # print('account data', account_data)
         valid_accounts = []
         valid_account_ids = []
         for account in account_data["data"]:

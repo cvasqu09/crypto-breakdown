@@ -1,14 +1,47 @@
 import { defineStore } from "pinia";
 import httpClient from "../httpClient";
+import { Wallet } from "../types";
+import get from "lodash/get";
 
 export const useWallet = defineStore("wallet", {
   state: () => {
     return {
       favoriteWallets: [],
+      wallet: {},
       breakdown: {},
+      prices: {},
     };
   },
+  getters: {
+    getPrice() {
+      return (walletId: string) => get(this.prices, walletId, null);
+    },
+  },
   actions: {
+    async loadWallet(walletId: string) {
+      const response = await httpClient.get(`/accounts/${walletId}`);
+      const data = response["data"];
+      this.wallet = data;
+      await this.loadPrice(this.wallet as Wallet);
+    },
+    async loadPrice(wallet: Wallet) {
+      try {
+        // @ts-ignore
+        if (!this.prices[wallet.id]) {
+          const response = await httpClient.get(`/price/`, {
+            params: {
+              crypto: wallet.balance_currency,
+              native: wallet.native_currency,
+            },
+          });
+          // @ts-ignore
+          this.prices[wallet.id] = response.data;
+          return response.data;
+        }
+      } catch (e) {
+        console.log("Error loading price", e);
+      }
+    },
     async loadFavoriteWallets() {
       try {
         const response = await httpClient.get("accounts/favorites/");

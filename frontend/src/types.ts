@@ -6,3 +6,9 @@ export interface Wallet {
   native_currency: string;
   balance_amount: number;
 }
+
+export interface Price {
+  base: string;
+  currency: string;
+  amount: number;
+}

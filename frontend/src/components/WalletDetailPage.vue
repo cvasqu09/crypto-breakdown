@@ -3,7 +3,10 @@
     <Toast position="top-right"></Toast>
     <Button class="mt-3 p-button-info" @click="refreshAccount">Refresh accounts</Button>
   </div>
-  <h3>Wallet Detail</h3>
+  <h1>Wallet Detail</h1>
+  <div class="flex">
+    <GainLossCard title="Total Gain/Loss (%)" :value="gainLossPercent" type="percent"></GainLossCard>
+  </div>
   <div class="flex justify-content-center">
     <Card class="mr-3 cost-card">
       <template #title>
@@ -44,11 +47,11 @@ import httpClient from "../httpClient";
 import PieChart from "./charts/PieChart.vue";
 import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
-
+import GainLossCard from "./GainLossCard.vue";
 
 export default {
   name: "WalletDetailPage.vue",
-  components: {PieChart, Toast},
+  components: {GainLossCard, PieChart, Toast},
   setup() {
     const route = useRoute();
     const toast = useToast();
@@ -74,6 +77,9 @@ export default {
     onMounted(async () => {
       const walletId = route.params.id;
       await walletStore.refreshWallet(walletId);
+      await walletStore.loadWallet(walletId);
+      const wallet = walletStore.wallet;
+      await walletStore.loadPrice(wallet);
       const response = await httpClient.get(`/accounts/${walletId}/buys`)
       buys.value = response.data.data
       symbol.value = response.data.symbol
@@ -83,6 +89,7 @@ export default {
       const amountList = buys.value.map(buy => get(buy, 'total.amount', 0))
       return amountList.reduce((prev, curr) => prev + parseFloat(curr), 0)
     })
+
 
     const totalSubCost = computed(() => {
       const amountList = buys.value.map(buy => get(buy, 'subtotal.amount', 0))
@@ -94,6 +101,15 @@ export default {
       return amountList.reduce((prev, curr) => {
         return prev + parseFloat(curr)
       }, 0)
+    })
+
+    const gainLossPercent = computed(() => {
+      const currentPrice = walletStore.getPrice(walletId);
+
+      const priceAmount = get(currentPrice, 'amount', 0);
+      const currentWorth = totalAmountBought.value * priceAmount;
+
+      return (currentWorth / totalSubCost.value) - 1;
     })
 
     const data = computed(() => {
@@ -125,6 +141,7 @@ export default {
     return {
       buys,
       data,
+      gainLossPercent,
       totalAmountBought,
       totalFees,
       totalSubCost,
