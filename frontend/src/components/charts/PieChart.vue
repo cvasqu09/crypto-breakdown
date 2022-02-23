@@ -27,7 +27,7 @@ export default {
 
     const buildChart = (labels, data) => {
       const ctx = document.getElementById('chart');
-
+      Chart.defaults.plugins.legend.labels.color = '#ffffff';
       myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -40,9 +40,18 @@ export default {
             backgroundColor: [
               'rgb(255, 99, 132)',
               'rgb(54, 162, 235)',
+              'rgb(128, 255, 0)',
+              'rgb(255, 153, 255)',
+              'rgb(153, 153, 255)',
+              'rgb(255, 255, 103)'
             ],
-            hoverOffset: 4
-          }]
+            hoverOffset: 4,
+            color: '#ffffff'
+          }],
+        },
+        options: {
+          responsive: false,
+
         }
       });
     }

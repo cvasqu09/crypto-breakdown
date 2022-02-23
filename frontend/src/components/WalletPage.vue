@@ -1,7 +1,10 @@
 <template>
   <h3>Wallets</h3>
-  <div v-for="account in accounts">
-    <Button @click="goToAccountDetailPage(account.id)">{{account.name}}</Button>
+  <div class="flex flex-wrap">
+
+    <template v-for="account in accounts">
+      <WalletCard :wallet="account"></WalletCard>
+    </template>
   </div>
 </template>
 
@@ -12,9 +15,11 @@ import { useRouter } from 'vue-router';
 import { Wallet } from '../types';
 import { storeToRefs } from 'pinia';
 import { useWallet } from '../store/useWallet';
+import WalletCard from './WalletCard.vue';
 
 export default {
   name: "WalletPage",
+  components: { WalletCard },
   setup() {
     const accounts: Ref<Wallet[]> = ref([]);
     const router = useRouter();

@@ -42,6 +42,25 @@ export const useWallet = defineStore("wallet", {
         console.log("Error loading price", e);
       }
     },
+    async loadBulkPrices(wallets: Wallet[]) {
+      try {
+        console.log("wallets", wallets);
+        const symbols = wallets.map((wallet) => wallet.balance_currency);
+        const response = await httpClient.post("/price/bulk/", {
+          symbols: symbols,
+        });
+        const price_data = response.data;
+        Object.keys(price_data).forEach((priceKey, i) => {
+          const symbol = symbols[i];
+          const wallet = wallets[i];
+          // @ts-ignore
+          this.prices[wallet.id] = price_data[symbol];
+        });
+        return this.prices;
+      } catch (e) {
+        console.log("Error loading bulk prices", e);
+      }
+    },
     async loadFavoriteWallets() {
       try {
         const response = await httpClient.get("accounts/favorites/");

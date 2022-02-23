@@ -14,7 +14,7 @@ from crypto.serializers import AccountSerializer, BuySerializer, FavoriteWalletS
 
 
 class PriceViewSet(ViewSet):
-    http_method_names = ['get']
+    http_method_names = ['get', 'post']
 
     def list(self, request):
         crypto_currency = request.query_params.get('crypto', None)
@@ -25,6 +25,18 @@ class PriceViewSet(ViewSet):
             return Response(status=status.HTTP_200_OK, data=buy_price)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": 'Error retrieving buy price'})
+
+    @action(detail=False, methods=['post'])
+    def bulk(self, request):
+        data = request.data
+        symbols = data["symbols"]
+        native_currency = 'USD'
+        buy_prices = {}
+        print('symbols', symbols)
+        for symbol in symbols:
+            buy_price = coinbase_client.get_sell_price(currency_pair=f"{symbol}-{native_currency}")
+            buy_prices[symbol] = buy_price
+        return Response(status=status.HTTP_200_OK, data=buy_prices)
 
 
 class BreakdownViewSet(ViewSet):
@@ -100,7 +112,7 @@ class RefreshViewSet(ViewSet):
 
 
 class AccountViewSet(ModelViewSet):
-    queryset = Account.objects.all().order_by('balance_currency')
+    queryset = Account.objects.all().order_by('-balance_amount')
     serializer_class = AccountSerializer
     http_method_names = ['get', 'post']
 

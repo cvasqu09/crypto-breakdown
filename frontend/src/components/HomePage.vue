@@ -2,25 +2,13 @@
   <div class="flex justify-content-end">
     <Menu ref="menu" :model="menuItems" :popup="true"/>
   </div>
-  <div v-for="account in accounts">
-    {{ account.name }} {{ account.native_amount }}
-  </div>
+  <FullAccountBreakdown></FullAccountBreakdown>
   <h1>Favorite Wallets</h1>
   <div class="flex flex-row p-3">
-    <Card v-for="favorite in favoriteWallets" class="mr-5">
-      <template #title>
-        <div class="flex align-content-center">
-          <img class="mr-2"
-              :src="`node_modules/cryptocurrency-icons/svg/color/${favorite.wallet.balance_currency}.svg`"
-              height="32"
-              width="32">
-          <span>{{ favorite.wallet.name }}</span>
-        </div>
-      </template>
-      <template #content>
-        <Button @click="navigateToWalletDetail(favorite.wallet.id)">Wallet</Button>
-      </template>
-    </Card>
+    <template v-for="favorite in favoriteWallets">
+      <WalletCard :wallet="favorite.wallet"></WalletCard>
+
+    </template>
   </div>
 </template>
 
@@ -31,9 +19,12 @@ import { useWallet } from "../store/useWallet";
 import { storeToRefs } from "pinia";
 import { useBreakdown } from "../store/useBreakdown";
 import { Wallet } from '../types'
+import FullAccountBreakdown from './FullAccountBreakdown.vue';
+import WalletCard from './WalletCard.vue';
 
 export default {
   name: "HomePage",
+  components: {FullAccountBreakdown, WalletCard},
   setup() {
     const accounts = ref([]);
     const router = useRouter()
@@ -51,15 +42,13 @@ export default {
     }]
     const menu = ref(null);
 
-    const navigateToWalletDetail = (walletId) => {
-      router.push({name: 'wallet-detail', params: {id: walletId}})
-    }
-
     onMounted(async () => {
-      await walletStore.loadFavoriteWallets();
+      const loadedWallets = await walletStore.loadFavoriteWallets() || [];
       await walletStore.loadBreakdown();
       await breakdownStore.loadBreakdown();
-      console.log('breakdown', fullBreakdown)
+      // @ts-ignore
+      const wallets = loadedWallets.map(wallet => wallet.wallet)
+      await walletStore.loadBulkPrices(wallets)
     })
 
     return {
@@ -69,7 +58,6 @@ export default {
       fullBreakdown,
       menuItems,
       menu,
-      navigateToWalletDetail,
     }
   }
 }
