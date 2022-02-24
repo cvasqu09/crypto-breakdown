@@ -47,7 +47,7 @@ import httpClient from "../httpClient";
 import PieChart from "./charts/PieChart.vue";
 import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
-import GainLossCard from "./GainLossCard.vue";
+import GainLossCard from "./cards/GainLossCard.vue";
 
 export default {
   name: "WalletDetailPage.vue",

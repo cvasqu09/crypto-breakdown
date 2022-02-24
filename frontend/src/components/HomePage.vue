@@ -20,7 +20,7 @@ import { storeToRefs } from "pinia";
 import { useBreakdown } from "../store/useBreakdown";
 import { Wallet } from '../types'
 import FullAccountBreakdown from './FullAccountBreakdown.vue';
-import WalletCard from './WalletCard.vue';
+import WalletCard from './cards/WalletCard.vue';
 
 export default {
   name: "HomePage",

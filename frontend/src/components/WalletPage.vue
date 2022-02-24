@@ -15,7 +15,7 @@ import { useRouter } from 'vue-router';
 import { Wallet } from '../types';
 import { storeToRefs } from 'pinia';
 import { useWallet } from '../store/useWallet';
-import WalletCard from './WalletCard.vue';
+import WalletCard from './cards/WalletCard.vue';
 
 export default {
   name: "WalletPage",

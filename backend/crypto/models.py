@@ -48,6 +48,9 @@ class AccountModelManager(models.Manager):
             subtotal = float(buy.subtotal["amount"])
             breakdown["fees"] += fees
             breakdown["subtotal"] += subtotal
+
+        if breakdown != {}:
+            breakdown["symbol"] = account.balance_currency
         return breakdown if breakdown != {} else None
 
 

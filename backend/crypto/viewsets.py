@@ -48,7 +48,7 @@ class BreakdownViewSet(ViewSet):
         for account in accounts:
             current_account_breakdown = Account.objects.get_account_breakdown(str(account.id))
             if current_account_breakdown:
-                breakdown[account.name] = current_account_breakdown
+                breakdown[str(account.id)] = current_account_breakdown
         return Response(status=status.HTTP_200_OK, data=breakdown)
 
 
