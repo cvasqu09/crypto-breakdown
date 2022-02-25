@@ -5,9 +5,8 @@
   <FullAccountBreakdown></FullAccountBreakdown>
   <h1>Favorite Wallets</h1>
   <div class="flex flex-row p-3">
-    <template v-for="favorite in favoriteWallets">
+    <template  v-for="favorite in Object.values(favoriteWallets)" :key="favorite.id">
       <WalletCard :wallet="favorite.wallet"></WalletCard>
-
     </template>
   </div>
 </template>
@@ -18,7 +17,6 @@ import { useRouter } from "vue-router";
 import { useWallet } from "../store/useWallet";
 import { storeToRefs } from "pinia";
 import { useBreakdown } from "../store/useBreakdown";
-import { Wallet } from '../types'
 import FullAccountBreakdown from './FullAccountBreakdown.vue';
 import WalletCard from './cards/WalletCard.vue';
 
@@ -31,7 +29,7 @@ export default {
     const walletStore = useWallet();
     const breakdownStore = useBreakdown();
     const {breakdown} = storeToRefs(walletStore);
-    const favoriteWallets: Wallet[] = walletStore.favoriteWallets;
+    const favoriteWallets = walletStore.favoriteWallets;
     const {breakdown: fullBreakdown} = storeToRefs(breakdownStore);
 
     const menuItems = [{
@@ -43,11 +41,11 @@ export default {
     const menu = ref(null);
 
     onMounted(async () => {
-      const loadedWallets = await walletStore.loadFavoriteWallets() || [];
+      const loadedWallets = await walletStore.loadFavoriteWallets() || {};
       await walletStore.loadBreakdown();
       await breakdownStore.loadBreakdown();
       // @ts-ignore
-      const wallets = loadedWallets.map(wallet => wallet.wallet)
+      const wallets = Object.values(loadedWallets).map(favoriteWallet => favoriteWallet.wallet) || []
       await walletStore.loadBulkPrices(wallets)
     })
 

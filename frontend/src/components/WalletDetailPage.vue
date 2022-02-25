@@ -66,7 +66,7 @@ export default {
     }
 
     const getFavoriteButtonText = computed(() => {
-      const favoriteWallets = walletStore.favoriteWallets.map(favoriteWallet => favoriteWallet.wallet.id);
+      const favoriteWallets = Object.values(walletStore.favoriteWallets).map(favoriteWallet => favoriteWallet.wallet.id);
       if (favoriteWallets.includes(walletId)) {
         return 'Unfavorite'
       } else {

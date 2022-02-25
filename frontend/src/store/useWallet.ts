@@ -6,7 +6,7 @@ import get from "lodash/get";
 export const useWallet = defineStore("wallet", {
   state: () => {
     return {
-      favoriteWallets: [],
+      favoriteWallets: {},
       wallet: {},
       breakdown: {},
       prices: {},
@@ -68,7 +68,7 @@ export const useWallet = defineStore("wallet", {
         return this.favoriteWallets;
       } catch (e) {
         console.log("Error retrieving favorite wallets", e);
-        this.favoriteWallets = [];
+        this.favoriteWallets = {};
       }
     },
     async toggleFavoriteWallet(id: string) {

@@ -4,13 +4,26 @@
     <div class="flex">
       <PieChart :data="data" :labels="labels"></PieChart>
       <div class="flex flex-column">
-        <div class="flex">
-          <PriceCard v-for="key in accountKeys" :symbol="getSymbol(key)" :price="getPrice(key)" class="mr-3">
-            <template #text><div>Price</div></template>
-          </PriceCard>
+        <div class="flex flex-column mb-3">
+          <div>Current prices</div>
+          <div class="flex">
+            <PriceCard
+v-for="key in accountKeys" :key="key" :symbol="getSymbol(key)" :price="getPrice(key)"
+                       class="mr-3">
+              <template #text>
+                <div>Price</div>
+              </template>
+            </PriceCard>
+          </div>
         </div>
-        <div>
-          Break even prices
+        <div class="flex flex-column">
+          <div>Break even prices</div>
+          <div class="flex">
+            <PriceCard
+v-for="key in accountKeys"
+                       :key=key :price="getBreakevenPrice(key)" :symbol="getSymbol(key)"
+                       class="mr-3"></PriceCard>
+          </div>
         </div>
       </div>
     </div>
@@ -44,6 +57,13 @@ export default {
       return parseFloat(amount)
     }
 
+    const getBreakevenPrice = (id) => {
+      const accountBreakdown = breakdownStore.breakdown[id]
+      const paidPrice = get(accountBreakdown, 'fees', 0.0) + get(accountBreakdown, 'subtotal', 0.0)
+      const currentAmount = get(walletStore.favoriteWallets[id], 'wallet.balance_amount', 0)
+      console.log(currentAmount)
+      return (currentAmount < .0000001) ? 0 : (paidPrice / currentAmount);
+    }
 
     const getSymbol = (id) => {
       const symbol = get(breakdownStore.breakdown, `${id}.symbol`, null)
@@ -54,6 +74,7 @@ export default {
       accountKeys,
       data,
       labels,
+      getBreakevenPrice,
       getPrice,
       getSymbol,
     }

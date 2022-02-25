@@ -140,7 +140,8 @@ class AccountViewSet(ModelViewSet):
         if request.method == 'GET':
             favorites = FavoriteWallet.objects.filter(user=me)
             serializer = FavoriteWalletSerializer(favorites, many=True)
-            return Response(status=status.HTTP_200_OK, data=serializer.data)
+            return_data = {wallet["wallet"]["id"]: wallet for wallet in serializer.data}
+            return Response(status=status.HTTP_200_OK, data=return_data)
         elif request.method == 'POST':
             body = request.data
             ids = body["ids"]
