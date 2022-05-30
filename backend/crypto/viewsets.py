@@ -1,4 +1,5 @@
-from uuid import UUID
+from datetime import datetime
+from uuid import UUID, uuid4
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,7 +11,7 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 
 from crypto import coinbase_client
 from crypto.models import Account, Buy, FavoriteWallet
-from crypto.serializers import AccountSerializer, BuySerializer, FavoriteWalletSerializer
+from crypto.serializers import AccountSerializer, BuySerializer, FavoriteWalletSerializer, CoinbaseBuySerializer
 
 
 class PriceViewSet(ViewSet):
@@ -166,10 +167,38 @@ class AccountViewSet(ModelViewSet):
 
         buys_data = {
             "data": buys_serializer.data,
-            "symbol":  account.balance_currency
+            "symbol": account.balance_currency
         }
 
         return Response(status=status.HTTP_200_OK, data=buys_data)
+
+    @action(detail=False, methods=['post'])
+    def import_buy(self, request):
+        body = request.data
+        balance_currency = body.get("balance_currency")
+        cost = body.get("cost")
+        fees = body.get("fees")
+        print("request", balance_currency, cost, fees, body)
+        buy_data = CoinbaseBuySerializer({
+            "balance_currency": balance_currency,
+            "cost": cost,
+            "fees": fees
+        }).data
+
+        try:
+            account = Account.objects.get(balance_currency__iexact=balance_currency)
+            Buy.objects.create(
+                id=str(uuid4()),
+                account=account,
+                status=Buy.BuyStatus.COMPLETED,
+                fees=buy_data["fees"],
+                amount=buy_data["amount"],
+                total=buy_data["total"]
+            )
+        except Account.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "Currency does not exist."})
+
+        return Response(status=status.HTTP_200_OK, data=body)
 
 
 class CurrencyViewSet(ViewSet):

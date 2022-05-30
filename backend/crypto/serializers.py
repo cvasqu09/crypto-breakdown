@@ -16,6 +16,37 @@ amount_schema = {
 }
 
 
+class CoinbaseBuySerializer(serializers.Serializer):
+    fees = serializers.SerializerMethodField()
+    amount = serializers.SerializerMethodField()
+    total = serializers.SerializerMethodField()
+
+    def get_total(self, instance):
+        instance_cost = instance.get("cost")
+        return {
+            "amount": f"{instance_cost}",
+            "currency": "USD"
+        }
+
+    def get_amount(self, instance):
+        instance_amount = instance.get("amount")
+        instance_balance_currency = instance.get("balance_currency")
+        return {
+            "amount": f"{instance_amount}",
+            "currency": f"{instance_balance_currency}"
+        }
+
+    def get_fees(self, instance):
+        instance_fees = instance.get("fees")
+        return [{
+            "type": "coinbase",
+            "amount": {"amount": f"{instance_fees}", "currency": "USD"},
+        }, {
+            "type": "bank",
+            "amount": {"amount": "0", "currency": "USD"},
+        }]
+
+
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
