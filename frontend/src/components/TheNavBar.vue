@@ -10,6 +10,7 @@ export default {
     const tabs = [
       {label: 'Home', icon: 'pi pi-home', to: '/'},
       {label: 'Wallets', icon: 'pi pi-wallet', to: '/wallet'},
+      {label: 'Imports', icon: 'pi pi-cloud-download', to: '/imports'},
     ]
     return {
       tabs

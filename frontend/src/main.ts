@@ -8,8 +8,11 @@ import Button from "primevue/button";
 import Menu from "primevue/menu";
 import Dialog from "primevue/dialog";
 import Card from "primevue/card";
+import Calendar from "primevue/calendar";
+
 import TabMenu from "primevue/tabmenu";
 import InputText from "primevue/inputtext";
+
 import "primevue/resources/themes/md-dark-deeppurple/theme.css"; //theme
 import "primevue/resources/primevue.min.css"; //core css
 import "primeicons/primeicons.css"; //icons
@@ -17,6 +20,7 @@ import "primeflex/primeflex.css";
 import HomePage from "./components/HomePage.vue";
 import WalletDetailPage from "./components/WalletDetailPage.vue";
 import AccountDetailPage from "./components/AccountDetailPage.vue";
+import ImportPage from "./components/ImportPage.vue";
 
 import { createRouter, createWebHashHistory } from "vue-router";
 import WalletPage from "./components/WalletPage.vue";
@@ -30,6 +34,11 @@ const routes = [
     path: "/account/:id",
     component: AccountDetailPage,
     name: "account-detail",
+  },
+  {
+    path: "/imports",
+    component: ImportPage,
+    name: "imports",
   },
 ];
 
@@ -49,4 +58,5 @@ app.component("Menu", Menu);
 app.component("InputText", InputText);
 app.component("TabMenu", TabMenu);
 app.component("Card", Card);
+app.component("Calendar", Calendar);
 app.mount("#app");

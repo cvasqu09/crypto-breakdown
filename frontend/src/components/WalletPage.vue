@@ -18,6 +18,10 @@
         <label for="fees" class="mr-4 align-self-center">Fees</label>
         <InputText id="fees" type="text" v-model="fees"></InputText>
       </div>
+      <div class="flex mb-4">
+        <label for="fees" class="mr-4 align-self-center">Amount</label>
+        <InputText id="amount" type="text" v-model="amount"></InputText>
+      </div>
     </div>
 
     <template #footer>
@@ -60,6 +64,7 @@ export default {
     const balance_currency: Ref<string> = ref('');
     const fees: Ref<number> = ref(0);
     const cost: Ref<number> = ref(0);
+    const amount: Ref<number> = ref(0);
     const router = useRouter();
     const toast = useToast();
     const { favoriteWallets } = storeToRefs(useWallet())
@@ -77,9 +82,10 @@ export default {
         const body = {
           balance_currency: balance_currency.value,
           cost: parseFloat(cost.value),
-          fees: parseFloat(fees.value)
+          fees: parseFloat(fees.value),
+          amount: parseFloat(amount.value),
         }
-        const response = await httpClient.post('/accounts/import_buy/', body);
+        await httpClient.post('/accounts/import_buy/', body);
         toast.add({
           severity: 'success',
           summary: 'Success',
@@ -103,6 +109,7 @@ export default {
     })
     return {
       accounts,
+      amount,
       balance_currency,
       cost,
       displayModal,

@@ -45,7 +45,7 @@ class AccountModelManager(models.Manager):
         breakdown = defaultdict(float)
         for buy in account_buys:
             fees = sum(float(fee["amount"]["amount"]) for fee in buy.fees)
-            subtotal = float(buy.subtotal["amount"])
+            subtotal = float(buy.subtotal.get("amount", 0))
             breakdown["fees"] += fees
             breakdown["subtotal"] += subtotal
 
@@ -65,6 +65,9 @@ class Account(models.Model):
 
     objects = AccountModelManager()
 
+    def get_manual_buys(self):
+        return Buy.objects.filter(account=self, is_manual_import=True)
+
 
 class Buy(models.Model):
     class BuyStatus(models.TextChoices):
@@ -80,6 +83,7 @@ class Buy(models.Model):
     amount = models.JSONField(default=dict)
     subtotal = models.JSONField(default=dict)
     total = models.JSONField(default=dict)
+    is_manual_import = models.BooleanField(default=False)
 
 
 class FavoriteWallet(models.Model):

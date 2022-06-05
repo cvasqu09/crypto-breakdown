@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db import transaction, IntegrityError
 from django.db.models import Sum
 from rest_framework import status, serializers
 from rest_framework.decorators import action
@@ -80,7 +81,6 @@ class RefreshViewSet(ViewSet):
                 account_to_update.native_currency = account["native_balance"]["currency"]
                 account_to_update.save()
             else:
-
                 Account.objects.create_account(account)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -158,6 +158,10 @@ class AccountViewSet(ModelViewSet):
 
             return Response(status=status.HTTP_201_CREATED)
 
+    def destroy(self, request, pk=None):
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
     @action(detail=True, methods=['get'])
     def buys(self, request, pk=None):
         buys = list(Buy.objects.filter(account__id=pk))
@@ -172,31 +176,52 @@ class AccountViewSet(ModelViewSet):
 
         return Response(status=status.HTTP_200_OK, data=buys_data)
 
+    @action(detail=False, methods=['get'])
+    def manual_buys(self, request):
+        manual_buys = list(Buy.objects.filter(is_manual_import=True))
+        serializer = BuySerializer(manual_buys, many=True)
+
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
+
     @action(detail=False, methods=['post'])
     def import_buy(self, request):
         body = request.data
-        balance_currency = body.get("balance_currency")
+        balance_currency = body.get("balance_currency").upper()
         cost = body.get("cost")
         fees = body.get("fees")
-        print("request", balance_currency, cost, fees, body)
+        amount = body.get("amount")
+        created_at = body.get("created_at")
+
         buy_data = CoinbaseBuySerializer({
             "balance_currency": balance_currency,
             "cost": cost,
-            "fees": fees
+            "fees": fees,
+            "amount": amount,
+            "created_at": created_at
         }).data
 
         try:
-            account = Account.objects.get(balance_currency__iexact=balance_currency)
-            Buy.objects.create(
-                id=str(uuid4()),
-                account=account,
-                status=Buy.BuyStatus.COMPLETED,
-                fees=buy_data["fees"],
-                amount=buy_data["amount"],
-                total=buy_data["total"]
-            )
+            with transaction.atomic():
+                account = Account.objects.get(balance_currency__exact=balance_currency)
+                Buy.objects.create(
+                    id=str(uuid4()),
+                    account=account,
+                    status=Buy.BuyStatus.COMPLETED,
+                    fees=buy_data["fees"],
+                    amount=buy_data["amount"],
+                    total=buy_data["total"],
+                    created_at=created_at,
+                    is_manual_import=True
+                )
+                account.balance_amount = account.balance_amount + amount
+                account.save()
         except Account.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "Currency does not exist."})
+        except IntegrityError:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"message": "Something wrong occurred while adding manual import"}
+            )
 
         return Response(status=status.HTTP_200_OK, data=body)
 
