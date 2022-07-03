@@ -57,7 +57,6 @@ export default {
     }
 
     watch(props, () => {
-      console.log(props.data)
       buildChart(props.labels, props.data)
     })
   }

@@ -44,7 +44,6 @@ export const useWallet = defineStore("wallet", {
     },
     async loadBulkPrices(wallets: Wallet[]) {
       try {
-        console.log("wallets", wallets);
         const symbols = wallets.map((wallet) => wallet.balance_currency);
         const response = await httpClient.post("/price/bulk/", {
           symbols: symbols,

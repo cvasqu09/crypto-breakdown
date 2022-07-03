@@ -61,7 +61,6 @@ export default {
       const accountBreakdown = breakdownStore.breakdown[id]
       const paidPrice = get(accountBreakdown, 'fees', 0.0) + get(accountBreakdown, 'subtotal', 0.0)
       const currentAmount = get(walletStore.favoriteWallets[id], 'wallet.balance_amount', 0)
-      console.log(currentAmount)
       return (currentAmount < .0000001) ? 0 : (paidPrice / currentAmount);
     }
 

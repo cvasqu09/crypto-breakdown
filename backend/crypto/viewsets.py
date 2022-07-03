@@ -112,10 +112,16 @@ class RefreshViewSet(ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class ManualBuyViewSet(ModelViewSet):
+    queryset = Buy.objects.filter(is_manual_import=True)
+    serializer_class = BuySerializer
+    http_method_names = ['get', 'delete']
+
+
 class AccountViewSet(ModelViewSet):
     queryset = Account.objects.all().order_by('-balance_amount')
     serializer_class = AccountSerializer
-    http_method_names = ['get', 'post']
+    http_method_names = ['get', 'post', 'delete']
 
     @action(detail=False, methods=['get'])
     def breakdown(self, request):
@@ -182,6 +188,12 @@ class AccountViewSet(ModelViewSet):
         serializer = BuySerializer(manual_buys, many=True)
 
         return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+    @action(detail=False, methods=['delete'])
+    def manual_buys_delete(self, request):
+        data = request.data
+        print(data)
+        return Response(status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'])
     def import_buy(self, request):

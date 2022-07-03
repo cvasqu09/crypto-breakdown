@@ -18,7 +18,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from backend import settings
-from crypto.viewsets import AccountViewSet, RefreshViewSet, CurrencyViewSet, BreakdownViewSet, PriceViewSet
+from crypto.viewsets import AccountViewSet, RefreshViewSet, CurrencyViewSet, BreakdownViewSet, PriceViewSet, \
+    ManualBuyViewSet
 
 router = DefaultRouter()
 router.register(r'accounts', AccountViewSet, basename="accounts")
@@ -26,6 +27,7 @@ router.register(r'refresh', RefreshViewSet, basename="refresh")
 router.register(r'currency', CurrencyViewSet, basename="currency")
 router.register(r'breakdown', BreakdownViewSet, basename="breakdown")
 router.register(r'price', PriceViewSet, basename="price")
+router.register(r'manual_buys', ManualBuyViewSet, basename="manual_buys")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
